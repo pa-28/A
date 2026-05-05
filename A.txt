@@ -1,0 +1,2136 @@
+# ============================================================
+# MASTER CODE FOR CSP LAB (Google OR-Tools)
+# Covers:
+# 1. Basic CSP (a, b, c variables)
+# 2. Employee Shift Assignment
+# 3. N-Queens Problem
+# 4. Allowed / Forbidden Assignments
+# 5. Solver Status Checking
+#
+# Use only the required section in exam/lab paper.
+# Keep comments so you know which part to write for each question.
+# ============================================================
+
+from ortools.sat.python import cp_model
+
+
+# ============================================================
+# PART 1: BASIC CSP EXAMPLE
+# Use when question asks:
+# "Create variables and apply simple constraints"
+# Example: a, b, c with different values
+# ============================================================
+
+def basic_csp():
+    print("\n===== BASIC CSP EXAMPLE =====")
+
+    model = cp_model.CpModel()
+
+    # Create variables with domain 1 to 3
+    a = model.NewIntVar(1, 3, 'a')
+    b = model.NewIntVar(1, 3, 'b')
+    c = model.NewIntVar(1, 3, 'c')
+
+    # Constraint: all values must be different
+    model.Add(a != b)
+    model.Add(b != c)
+    model.Add(a != c)
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        print("a =", solver.Value(a))
+        print("b =", solver.Value(b))
+        print("c =", solver.Value(c))
+    else:
+        print("No solution found")
+
+
+# ============================================================
+# PART 2: EMPLOYEE SHIFT ASSIGNMENT
+# Use when question asks:
+# "Assign shifts with constraints"
+# ============================================================
+
+def employee_shift():
+    print("\n===== EMPLOYEE SHIFT ASSIGNMENT =====")
+
+    model = cp_model.CpModel()
+
+    # Shift values: 0, 1, 2
+    alice = model.NewIntVar(0, 2, 'Alice')
+    bob = model.NewIntVar(0, 2, 'Bob')
+    charlie = model.NewIntVar(0, 2, 'Charlie')
+
+    # Constraints
+    model.Add(alice != bob)   # Alice and Bob cannot have same shift
+    model.Add(bob != 0)       # Bob cannot take shift 0
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        print("Alice Shift =", solver.Value(alice))
+        print("Bob Shift =", solver.Value(bob))
+        print("Charlie Shift =", solver.Value(charlie))
+    else:
+        print("No valid assignment")
+
+
+# ============================================================
+# PART 3: N-QUEENS PROBLEM
+# Use when question asks:
+# "Solve 8 queens using CSP"
+# ============================================================
+
+def n_queens():
+    print("\n===== N-QUEENS PROBLEM =====")
+
+    n = 8
+    model = cp_model.CpModel()
+
+    # queens[i] = row position of queen in column i
+    queens = [model.NewIntVar(0, n - 1, f'q{i}') for i in range(n)]
+
+    # No two queens in same row
+    model.AddAllDifferent(queens)
+
+    # Diagonal constraints
+    diag1 = []
+    diag2 = []
+
+    for i in range(n):
+        d1 = model.NewIntVar(0, 2 * n, f'd1_{i}')
+        d2 = model.NewIntVar(-n, n, f'd2_{i}')
+
+        model.Add(d1 == queens[i] + i)
+        model.Add(d2 == queens[i] - i)
+
+        diag1.append(d1)
+        diag2.append(d2)
+
+    model.AddAllDifferent(diag1)
+    model.AddAllDifferent(diag2)
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        for i in range(n):
+            print(f"Column {i} -> Row {solver.Value(queens[i])}")
+    else:
+        print("No solution")
+
+
+# ============================================================
+# PART 4: ALLOWED / FORBIDDEN ASSIGNMENTS
+# Use when question asks:
+# "Use AddAllowedAssignments or AddForbiddenAssignments"
+# ============================================================
+
+def allowed_forbidden():
+    print("\n===== ALLOWED / FORBIDDEN ASSIGNMENTS =====")
+
+    model = cp_model.CpModel()
+
+    x = model.NewIntVar(1, 3, 'x')
+    y = model.NewIntVar(1, 3, 'y')
+
+    # Only these combinations are allowed
+    allowed = [(1, 2), (2, 3), (3, 1)]
+    model.AddAllowedAssignments([x, y], allowed)
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        print("x =", solver.Value(x))
+        print("y =", solver.Value(y))
+    else:
+        print("No solution")
+
+
+# ============================================================
+# PART 5: SOLVER STATUS CHECKING
+# Use when teacher asks about solver result types
+# ============================================================
+
+def solver_status_demo():
+    print("\n===== SOLVER STATUS =====")
+
+    model = cp_model.CpModel()
+
+    x = model.NewIntVar(1, 2, 'x')
+
+    # Impossible constraints
+    model.Add(x == 1)
+    model.Add(x == 2)
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL:
+        print("OPTIMAL")
+    elif status == cp_model.FEASIBLE:
+        print("FEASIBLE")
+    elif status == cp_model.INFEASIBLE:
+        print("INFEASIBLE")
+    else:
+        print("UNKNOWN")
+
+
+# ============================================================
+# MAIN FUNCTION
+# Run all examples together
+# In lab paper, usually copy only required section
+# ============================================================
+
+if __name__ == "__main__":
+    basic_csp()
+    employee_shift()
+    n_queens()
+    allowed_forbidden()
+    solver_status_demo()
+
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+CSP PRACTICE QUESTION ANSWER 
+
+from ortools.sat.python import cp_model
+
+model = cp_model.CpModel()
+
+C0 = model.NewIntVar(0, 2, "C0")
+C1 = model.NewIntVar(0, 2, "C1")
+C2 = model.NewIntVar(0, 2, "C2")
+C3 = model.NewIntVar(0, 2, "C3")
+C4 = model.NewIntVar(0, 2, "C4")
+C5 = model.NewIntVar(0, 2, "C5")
+C6 = model.NewIntVar(0, 2, "C6")
+C7 = model.NewIntVar(0, 2, "C7")
+
+# constraint: max 4 courses per slot
+
+#We do it manually (no loops, no lists):
+
+model.Add((C0 == 0) + (C1 == 0) + (C2 == 0) + (C3 == 0) + (C4 == 0) + (C5 == 0) + (C6 == 0) + (C7 == 0) <= 4)
+
+model.Add((C0 == 1) + (C1 == 1) + (C2 == 1) + (C3 == 1) + (C4 == 1) + (C5 == 1) + (C6 == 1) + (C7 == 1) <= 4)
+
+model.Add((C0 == 2) + (C1 == 2) + (C2 == 2) + (C3 == 2) + (C4 == 2) + (C5 == 2) + (C6 == 2) + (C7 == 2) <= 4)
+
+
+#Other constraints
+
+model.Add(C0 != C1)
+
+model.Add(C2 == C3)
+
+model.Add(C4 != C5)
+
+model.Add(C6 == C7)
+
+model.Add(C1 != C6)
+
+model.Add(C5 != 0)
+
+
+
+#Solve
+
+solver = cp_model.CpSolver()
+status = solver.Solve(model)
+
+if status in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
+    print("C0:", solver.Value(C0))
+    print("C1:", solver.Value(C1))
+    print("C2:", solver.Value(C2))
+    print("C3:", solver.Value(C3))
+    print("C4:", solver.Value(C4))
+    print("C5:", solver.Value(C5))
+    print("C6:", solver.Value(C6))
+    print("C7:", solver.Value(C7))
+
+
+
+
+
+
+
+# ============================================================
+# MASTER CODE FOR AI LAB (ADVERSARIAL SEARCH)
+# Covers:
+# 1. Simple recursion example (factorial)
+# 2. Max / Min value finding
+# 3. Minimax Algorithm
+# 4. Agent + Environment Model for Minimax
+# 5. Alpha-Beta Pruning
+# 6. Agent + Environment Model for Alpha-Beta
+#
+# In lab paper, write only the required section.
+# Comments tell you which part to use for which question.
+# ============================================================
+
+import math
+
+
+# ============================================================
+# PART 1: FACTORIAL (RECURSION BASICS)
+# Use when question asks recursion example
+# ============================================================
+
+def factorial(num):
+    if num == 1:
+        return 1
+    return num * factorial(num - 1)
+
+print("Factorial of 4 =", factorial(4))
+
+
+# ============================================================
+# PART 2: FIND MAX AND MIN
+# Use when question asks max/min logic before minimax
+# ============================================================
+
+def find_max_min():
+    numbers = [2, 7, 3, 10, 2, 11]
+
+    max_value = -math.inf
+    min_value = math.inf
+
+    for value in numbers:
+        max_value = max(max_value, value)
+
+    for value in numbers:
+        min_value = min(min_value, value)
+
+    print("Max =", max_value)
+    print("Min =", min_value)
+
+find_max_min()
+
+
+# ============================================================
+# COMMON NODE CLASS
+# Used in Minimax and Alpha-Beta
+# ============================================================
+
+class Node:
+    def __init__(self, value=None):
+        self.value = value
+        self.children = []
+        self.minmax_value = None
+
+
+# ============================================================
+# PART 3: MINIMAX ALGORITHM
+# Use when question asks:
+# "Implement Minimax"
+# ============================================================
+
+def minimax(node, depth, maximizing_player=True):
+    if depth == 0 or not node.children:
+        return node.value
+
+    if maximizing_player:
+        best_value = -math.inf
+        for child in node.children:
+            child_value = minimax(child, depth - 1, False)
+            best_value = max(best_value, child_value)
+        node.minmax_value = best_value
+        return best_value
+
+    else:
+        best_value = math.inf
+        for child in node.children:
+            child_value = minimax(child, depth - 1, True)
+            best_value = min(best_value, child_value)
+        node.minmax_value = best_value
+        return best_value
+
+
+# ============================================================
+# PART 4: AGENT + ENVIRONMENT FOR MINIMAX
+# Use when teacher asks PEAS / Agent Environment model
+# ============================================================
+
+class MinimaxAgent:
+    def __init__(self, depth):
+        self.depth = depth
+
+    def act(self, node, environment):
+        return environment.compute_minimax(node, self.depth)
+
+
+class Environment:
+    def __init__(self, tree):
+        self.tree = tree
+        self.computed_nodes = []
+
+    def compute_minimax(self, node, depth, maximizing_player=True):
+        if depth == 0 or not node.children:
+            self.computed_nodes.append(node.value)
+            return node.value
+
+        if maximizing_player:
+            best_value = -math.inf
+            for child in node.children:
+                best_value = max(
+                    best_value,
+                    self.compute_minimax(child, depth - 1, False)
+                )
+            node.minmax_value = best_value
+            return best_value
+
+        else:
+            best_value = math.inf
+            for child in node.children:
+                best_value = min(
+                    best_value,
+                    self.compute_minimax(child, depth - 1, True)
+                )
+            node.minmax_value = best_value
+            return best_value
+
+
+# ============================================================
+# PART 5: ALPHA-BETA PRUNING
+# Use when question asks:
+# "Implement Alpha-Beta pruning"
+# ============================================================
+
+def alpha_beta(node, depth, alpha, beta, maximizing_player=True):
+    if depth == 0 or not node.children:
+        return node.value
+
+    if maximizing_player:
+        best_value = -math.inf
+        for child in node.children:
+            best_value = max(
+                best_value,
+                alpha_beta(child, depth - 1, alpha, beta, False)
+            )
+            alpha = max(alpha, best_value)
+
+            if beta <= alpha:
+                print("Pruned node:", child.value)
+                break
+
+        node.minmax_value = best_value
+        return best_value
+
+    else:
+        best_value = math.inf
+        for child in node.children:
+            best_value = min(
+                best_value,
+                alpha_beta(child, depth - 1, alpha, beta, True)
+            )
+            beta = min(beta, best_value)
+
+            if beta <= alpha:
+                print("Pruned node:", child.value)
+                break
+
+        node.minmax_value = best_value
+        return best_value
+
+
+# ============================================================
+# SAMPLE TREE
+# Same tree works for Minimax + Alpha-Beta
+# ============================================================
+
+root = Node('A')
+B = Node('B')
+C = Node('C')
+root.children = [B, C]
+
+D = Node('D')
+E = Node('E')
+F = Node('F')
+G = Node('G')
+B.children = [D, E]
+C.children = [F, G]
+
+D.children = [Node(2), Node(3)]
+E.children = [Node(5), Node(9)]
+F.children = [Node(0), Node(1)]
+G.children = [Node(7), Node(5)]
+
+
+# ============================================================
+# RUN MINIMAX
+# ============================================================
+
+print("\n===== MINIMAX RESULT =====")
+minimax_result = minimax(root, 3, True)
+print("Root Minimax Value =", minimax_result)
+
+
+# ============================================================
+# RUN ALPHA-BETA
+# ============================================================
+
+print("\n===== ALPHA-BETA RESULT =====")
+alpha_beta_result = alpha_beta(root, 3, -math.inf, math.inf, True)
+print("Root Alpha-Beta Value =", alpha_beta_result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ============================================================
+# MASTER CODE FOR AI LAB (PROBABILISTIC AI)
+# Covers:
+# 1. Conditional Probability (Cards Example)
+# 2. Bayesian Network (Monty Hall Problem)
+# 3. Bayesian Network (Burglary Alarm Problem)
+# 4. Markov Process Simulation
+#
+# In lab paper, write only the required section.
+# Comments tell you which part to use.
+# ============================================================
+
+
+# ============================================================
+# PART 1: CONDITIONAL PROBABILITY
+# Use when question asks:
+# "Find P(King | Face Card) using simulation"
+# ============================================================
+
+import random
+
+
+def conditional_probability_cards():
+    print("\n===== CONDITIONAL PROBABILITY =====")
+
+    suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10',
+             'Jack', 'Queen', 'King', 'Ace']
+
+    # Create full deck
+    deck = [(rank, suit) for suit in suits for rank in ranks]
+
+    # Only face cards
+    face_cards = [card for card in deck if card[0] in ['Jack', 'Queen', 'King']]
+
+    trials = 100000
+    king_count = 0
+
+    for _ in range(trials):
+        card = random.choice(face_cards)
+        if card[0] == 'King':
+            king_count += 1
+
+    simulated_probability = king_count / trials
+    theoretical_probability = 4 / 12
+
+    print("Theoretical P(King | Face Card) =", theoretical_probability)
+    print("Simulated P(King | Face Card) =", round(simulated_probability, 3))
+
+
+# ============================================================
+# PART 2: BAYESIAN NETWORK (MONTY HALL)
+# Use when question asks:
+# "Create Bayesian Network using pgmpy"
+# ============================================================
+
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+
+def monty_hall_bn():
+    print("\n===== MONTY HALL BAYESIAN NETWORK =====")
+
+    model = DiscreteBayesianNetwork([
+        ('Guest', 'Monty'),
+        ('Prize', 'Monty')
+    ])
+
+    cpd_guest = TabularCPD(
+        variable='Guest',
+        variable_card=3,
+        values=[[1/3], [1/3], [1/3]],
+        state_names={'Guest': [1, 2, 3]}
+    )
+
+    cpd_prize = TabularCPD(
+        variable='Prize',
+        variable_card=3,
+        values=[[1/3], [1/3], [1/3]],
+        state_names={'Prize': [1, 2, 3]}
+    )
+
+    # Simplified CPD for Monty
+    cpd_monty = TabularCPD(
+        variable='Monty',
+        variable_card=3,
+        values=[
+            [0, 0, 0, 0, 0.5, 1, 0, 1, 0.5],
+            [0.5, 0, 1, 0, 0, 0, 1, 0, 0.5],
+            [0.5, 1, 0, 1, 0.5, 0, 0, 0, 0]
+        ],
+        evidence=['Guest', 'Prize'],
+        evidence_card=[3, 3],
+        state_names={
+            'Monty': [1, 2, 3],
+            'Guest': [1, 2, 3],
+            'Prize': [1, 2, 3]
+        }
+    )
+
+    model.add_cpds(cpd_guest, cpd_prize, cpd_monty)
+    print("Model Valid:", model.check_model())
+
+    inference = VariableElimination(model)
+    result = inference.query(variables=['Prize'])
+    print(result)
+
+
+# ============================================================
+# PART 3: BURGLARY ALARM PROBLEM
+# Use when question asks:
+# "Alarm Bayesian Network"
+# ============================================================
+
+
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+# Step 1: Define the structure of the Bayesian Network
+model = DiscreteBayesianNetwork([
+    ('Burglary', 'Alarm'),
+    ('Earthquake', 'Alarm'),
+    ('Alarm', 'JohnCalls'),
+    ('Alarm', 'MaryCalls')
+])
+
+# Step 2: Define the CPDs (Conditional Probability Distributions)
+
+# P(Burglary)
+cpd_burglary = TabularCPD(
+    variable='Burglary',
+    variable_card=2,
+    values=[[0.999], [0.001]]
+)
+
+# P(Earthquake)
+cpd_earthquake = TabularCPD(
+    variable='Earthquake',
+    variable_card=2,
+    values=[[0.998], [0.002]]
+)
+
+# P(Alarm | Burglary, Earthquake)
+cpd_alarm = TabularCPD(
+    variable='Alarm',
+    variable_card=2,
+    values=[
+        [0.999, 0.71, 0.06, 0.05],  # Alarm = False
+        [0.001, 0.29, 0.94, 0.95]   # Alarm = True
+    ],
+    evidence=['Burglary', 'Earthquake'],
+    evidence_card=[2, 2]
+)
+
+# P(JohnCalls | Alarm)
+cpd_john = TabularCPD(
+    variable='JohnCalls',
+    variable_card=2,
+    values=[
+        [0.3, 0.9],  # JohnCalls = False
+        [0.7, 0.1]   # JohnCalls = True
+    ],
+    evidence=['Alarm'],
+    evidence_card=[2]
+)
+
+# P(MaryCalls | Alarm)
+cpd_mary = TabularCPD(
+    variable='MaryCalls',
+    variable_card=2,
+    values=[
+        [0.2, 0.99],  # MaryCalls = False
+        [0.8, 0.01]   # MaryCalls = True
+    ],
+    evidence=['Alarm'],
+    evidence_card=[2]
+)
+
+# Step 3: Add CPDs to the model
+model.add_cpds(cpd_burglary, cpd_earthquake, cpd_alarm, cpd_john, cpd_mary)
+
+# Step 4: Verify the model
+assert model.check_model(), "Model is incorrect"
+
+# Step 5: Perform inference
+inference = VariableElimination(model)
+
+# Query
+result = inference.query(
+    variables=['Burglary'],
+    evidence={'JohnCalls': 1, 'MaryCalls': 1}
+)
+
+print(result)
+
+
+# ============================================================
+# PART 4: MARKOV PROCESS
+# Use when question asks:
+# "Simulate Markov Chain"
+# ============================================================
+
+import numpy as np
+
+
+def markov_process():
+    print("\n===== MARKOV PROCESS =====")
+
+    states = ['Red', 'Blue']
+
+    transition_matrix = np.array([
+        [0.5, 0.5],
+        [0.5, 0.5]
+    ])
+
+    def simulate(initial_state, steps):
+        current_state = initial_state
+        sequence = [current_state]
+
+        for _ in range(steps):
+            if current_state == 'Red':
+                next_state = np.random.choice(states, p=transition_matrix[0])
+            else:
+                next_state = np.random.choice(states, p=transition_matrix[1])
+
+            sequence.append(next_state)
+            current_state = next_state
+
+        return sequence
+
+    result = simulate('Red', 10)
+    print("State Sequence:", result)
+
+
+# ============================================================
+# MAIN FUNCTION
+# Run all examples together
+# In exam usually write only required part
+# ============================================================
+
+if __name__ == "__main__":
+    conditional_probability_cards()
+    # pgmpy must be installed before running below parts
+    # pip install pgmpy
+    monty_hall_bn()
+    burglary_alarm_bn()
+    markov_process()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ==============================
+# 🔥 MASTER LAB CODE TEMPLATE
+# Covers:
+# - Data Loading
+# - Basic EDA
+# - Data Cleaning
+# - Visualization
+# - Encoding
+# - Scaling
+# - Train/Test Split
+# - ML Models (Classification + Regression)
+# ==============================
+
+# ==============================
+# 📌 1. IMPORT LIBRARIES
+# ==============================
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# ML Libraries
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, mean_squared_error
+
+# ==============================
+# 📌 2. LOAD DATASET
+# ==============================
+# 👉 USE THIS WHEN: dataset is given as CSV
+df = pd.read_csv("your_file.csv")
+
+# 👉 IF EXAM PROVIDES DICT OR ARRAY → use pd.DataFrame()
+
+# ==============================
+# 📌 3. BASIC EDA (ALWAYS DO THIS)
+# ==============================
+print(df.head())        # First 5 rows
+print(df.info())        # Structure
+print(df.describe())    # Statistics
+print(df.isnull().sum())  # Missing values
+
+# ==============================
+# 📌 4. HANDLE MISSING VALUES
+# ==============================
+
+# 👉 USE THIS WHEN: missing values present
+# Numerical → mean
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+# Categorical → mode
+for col in df.select_dtypes(include='object'):
+    df[col].fillna(df[col].mode()[0], inplace=True)
+
+# ==============================
+# 📌 5. ENCODING (IMPORTANT)
+# ==============================
+
+# 👉 USE THIS WHEN: categorical data exists
+le = LabelEncoder()
+
+for col in df.select_dtypes(include='object'):
+    df[col] = le.fit_transform(df[col])
+
+ONE HOT ENODING : 
+
+df = pd.get_dummies(df, columns=['embarked'], drop_first=True)
+print(df.head())
+
+# ==============================
+# 📌 6. VISUALIZATION (VERY IMPORTANT IN LAB)
+# ==============================
+
+# 👉 USE THIS WHEN: understand relationships
+
+# Histogram
+df.hist(figsize=(10,8))
+plt.show()
+
+# Correlation heatmap
+sns.heatmap(df.corr(), annot=True)
+plt.show()
+
+# Scatter plot
+# 👉 USE THIS WHEN: check relation between 2 variables
+plt.scatter(df.iloc[:,0], df.iloc[:,1])
+plt.show()
+
+# ==============================
+# 📌 7. FEATURE & TARGET SPLIT
+# ==============================
+
+# 👉 CHANGE TARGET COLUMN NAME BASED ON QUESTION
+X = df.drop("target", axis=1)
+y = df["target"]
+
+# ==============================
+# 📌 8. TRAIN TEST SPLIT
+# ==============================
+
+# Generate dummy dataset
+X = np.random.rand(100, 5) # 100 samples, 5 features
+y = np.random.randint(0, 2, 100) # Binary target variable (0 or 1)
+# Splitting the data into 80% training and 20% testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=42)
+# Create a Naïve Bayes model
+model = GaussianNB()
+# Train the model on training data
+model.fit(X_train, y_train)
+# Predict on test data
+y_pred = model.predict(X_test)
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f&quot;Model Accuracy: {accuracy:.2f}&quot;)
+
+# 👉 USE THIS ALWAYS before ML
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+#K FOLD VALIDATION : 
+
+
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+
+# ==============================
+# 📌 9. SCALING (OPTIONAL BUT IMPORTANT)
+# ==============================
+
+# 👉 USE THIS WHEN:
+# - Distance-based model (KNN, Logistic Regression, etc.)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# ==============================
+# 📌 10. MODELS (CHOOSE BASED ON QUESTION)
+# ==============================
+
+# --------------------------------
+# 🔵 LINEAR REGRESSION
+# 👉 USE WHEN: target is CONTINUOUS (marks, price)
+# --------------------------------
+model = LinearRegression()
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+
+print("MSE:", mean_squared_error(y_test, pred))
+
+
+# --------------------------------
+# 🔵 LOGISTIC REGRESSION
+# 👉 USE WHEN: target is BINARY (0/1, yes/no)
+# --------------------------------
+model = LogisticRegression()
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, pred))
+
+
+# --------------------------------
+# 🔵 DECISION TREE
+# 👉 USE WHEN: classification OR non-linear data
+# --------------------------------
+model = DecisionTreeClassifier()
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, pred))
+
+
+# ==============================
+# 📌 11. RESULT INTERPRETATION
+# ==============================
+
+# 👉 USE THIS WHEN teacher asks explanation
+print("Predictions:", pred[:10])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ================================
+# 🔹 1. IMPORT LIBRARIES
+# ================================
+# Use this in EVERY lab
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Supervised models
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+# Unsupervised models
+from sklearn.cluster import KMeans
+
+# Preprocessing
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+# Evaluation
+from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error
+
+
+# ================================
+# 🔹 2. LOAD DATASET
+# ================================
+# 👉 Use when dataset is given (CSV mostly)
+
+data = pd.read_csv("your_dataset.csv")
+
+# Quick check
+print(data.head())
+print(data.info())
+
+
+# ================================
+# 🔹 3. DATA PREPROCESSING
+# ================================
+# 👉 Use when data has null values or text data
+
+# Handle missing values
+data = data.dropna()  # OR use fillna()
+
+# Convert categorical → numeric
+le = LabelEncoder()
+for col in data.columns:
+    if data[col].dtype == 'object':
+        data[col] = le.fit_transform(data[col])
+
+# Split features & target
+X = data.iloc[:, :-1]   # all columns except last
+y = data.iloc[:, -1]    # last column
+
+
+# ================================
+# 🔹 4. TRAIN-TEST SPLIT
+# ================================
+# 👉 Use in ALL supervised problems
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+# ================================
+# 🔹 5. FEATURE SCALING
+# ================================
+# 👉 Use when:
+# - KNN, Logistic Regression, KMeans
+# - Data values are very different in scale
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+# ================================
+# 🔹 6A. LINEAR REGRESSION (Supervised - Regression)
+# ================================
+# 👉 Use when:
+# - Output is continuous (price, marks, salary)
+
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+
+y_pred = lr.predict(X_test)
+
+# Evaluation
+mse = mean_squared_error(y_test, y_pred)
+print("MSE:", mse)
+
+
+# ================================
+# 🔹 6B. LOGISTIC REGRESSION (Supervised - Classification)
+# ================================
+# 👉 Use when:
+# - Output is categories (Yes/No, Pass/Fail)
+
+log_model = LogisticRegression()
+log_model.fit(X_train, y_train)
+
+y_pred = log_model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# ================================
+# 🔹 6C. DECISION TREE
+# ================================
+# 👉 Use when:
+# - You want simple interpretable model
+
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
+
+y_pred = dt.predict(X_test)
+
+print("Decision Tree Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# ================================
+# 🔹 6D. RANDOM FOREST
+# ================================
+# 👉 Use when:
+# - Need better accuracy than decision tree
+
+rf = RandomForestClassifier(n_estimators=100)
+rf.fit(X_train, y_train)
+
+y_pred = rf.predict(X_test)
+
+print("Random Forest Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# ================================
+# 🔹 7. CONFUSION MATRIX
+# ================================
+# 👉 Use for classification evaluation
+
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True)
+plt.title("Confusion Matrix")
+plt.show()
+
+
+# ================================
+# 🔹 8. K-MEANS CLUSTERING (Unsupervised)
+# ================================
+# 👉 Use when:
+# - No labels (y not given)
+# - Need grouping
+
+kmeans = KMeans(n_clusters=3)
+
+# IMPORTANT: only use X (no y)
+kmeans.fit(X)
+
+clusters = kmeans.predict(X)
+
+# Add cluster to dataset
+data['Cluster'] = clusters
+
+print(data.head())
+
+
+# ================================
+# 🔹 9. ELBOW METHOD (Find Best K)
+# ================================
+# 👉 Use before KMeans to choose clusters
+
+wcss = []
+
+for i in range(1, 11):
+    km = KMeans(n_clusters=i)
+    km.fit(X)
+    wcss.append(km.inertia_)
+
+plt.plot(range(1, 11), wcss)
+plt.title("Elbow Method")
+plt.xlabel("Number of Clusters")
+plt.ylabel("WCSS")
+plt.show()
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+
+
+BASIC PYTHON FOR ML 
+
+
+# =====================================================================
+# BASIC PYTHON FOR MACHINE LEARNING - COMPLETE CODE REFERENCE
+# =====================================================================
+
+
+# =====================================================================
+# 1. PYTHON BASICS FOR MACHINE LEARNING
+# =====================================================================
+
+# ---- Importing Libraries ----
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sklearn
+
+
+# ---- Reading Datasets ----
+# Reading a CSV file
+df = pd.read_csv('dataset.csv')
+
+# Reading an Excel file
+df_excel = pd.read_excel('dataset.xlsx')
+
+# Reading CSV with extra options (common ones)
+df = pd.read_csv('dataset.csv', sep=',', header=0, index_col=0)
+
+
+# ---- Data Inspection ----
+df.head()        # First 5 rows
+df.head(10)      # First 10 rows
+
+df.tail()        # Last 5 rows
+df.tail(10)      # Last 10 rows
+
+df.info()        # Summary: column names, non-null counts, data types
+
+df.describe()    # Statistical summary (mean, std, min, max, etc.)
+
+df.shape         # (rows, columns)
+
+df.columns       # List of column names
+
+df.dtypes        # Data type of each column
+
+
+
+# =====================================================================
+# 2. EXPLORATORY DATA ANALYSIS (EDA)
+# =====================================================================
+
+# ---- Understanding the Dataset ----
+print(df.dtypes)         # Data types of all columns
+print(df.columns)        # Feature/column names
+print(df.shape)          # Number of rows and columns
+
+
+# ---- Data Cleaning ----
+
+# Handling Missing Values
+df.isnull()                  # True/False for each cell
+df.isnull().sum()            # Count of missing values per column
+
+# Drop rows with missing values
+df_dropped = df.dropna()
+
+# Drop columns with missing values
+df_dropped_cols = df.dropna(axis=1)
+
+# Fill missing values
+df_filled = df.fillna(0)                       # fill with 0
+df['Age'] = df['Age'].fillna(df['Age'].mean()) # fill with mean
+df['Age'] = df['Age'].fillna(df['Age'].median())
+df['City'] = df['City'].fillna(df['City'].mode()[0])  # fill with mode
+
+
+# Removing Duplicates
+df.duplicated().sum()         # Count duplicates
+df = df.drop_duplicates()     # Drop duplicate rows
+
+
+# ---- Data Transformation ----
+
+# Changing Data Types
+df['Age'] = df['Age'].astype(int)
+df['Salary'] = df['Salary'].astype(float)
+df['Category'] = df['Category'].astype('category')
+df['Date'] = pd.to_datetime(df['Date'])
+
+
+# ---- Outlier Detection (using IQR method) ----
+Q1 = df['Salary'].quantile(0.25)
+Q3 = df['Salary'].quantile(0.75)
+IQR = Q3 - Q1
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Outliers
+outliers = df[(df['Salary'] < lower_bound) | (df['Salary'] > upper_bound)]
+
+# Removing outliers
+df_no_outliers = df[(df['Salary'] >= lower_bound) & (df['Salary'] <= upper_bound)]
+
+
+
+# =====================================================================
+# 3. DATA VISUALIZATION
+# =====================================================================
+
+# ---- Basic Plots (Matplotlib) ----
+
+# Line Plot
+plt.figure(figsize=(8, 5))
+plt.plot(df['Year'], df['Sales'], color='blue', marker='o')
+plt.title('Sales Over Years')
+plt.xlabel('Year')
+plt.ylabel('Sales')
+plt.show()
+
+# Bar Plot
+plt.figure(figsize=(8, 5))
+plt.bar(df['Category'], df['Count'], color='green')
+plt.title('Count by Category')
+plt.xlabel('Category')
+plt.ylabel('Count')
+plt.show()
+
+# Histogram
+plt.figure(figsize=(8, 5))
+plt.hist(df['Age'], bins=20, color='orange', edgecolor='black')
+plt.title('Age Distribution')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.show()
+
+# Scatter Plot
+plt.figure(figsize=(8, 5))
+plt.scatter(df['Height'], df['Weight'], color='red')
+plt.title('Height vs Weight')
+plt.xlabel('Height')
+plt.ylabel('Weight')
+plt.show()
+
+
+# ---- Advanced Plots (Seaborn) ----
+
+# Box Plot
+plt.figure(figsize=(8, 5))
+sns.boxplot(x='Category', y='Salary', data=df)
+plt.title('Salary by Category')
+plt.show()
+
+# Heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title('Heatmap of Correlations')
+plt.show()
+
+
+# ---- Other Visualizations ----
+
+# Correlation Matrix Plot
+corr_matrix = df.corr()
+plt.figure(figsize=(8, 6))
+sns.heatmap(corr_matrix, annot=True, cmap='Blues')
+plt.title('Correlation Matrix')
+plt.show()
+
+# Contour Plot
+x = np.linspace(-5, 5, 100)
+y = np.linspace(-5, 5, 100)
+X, Y = np.meshgrid(x, y)
+Z = np.sin(np.sqrt(X**2 + Y**2))
+
+plt.figure(figsize=(8, 6))
+plt.contour(X, Y, Z, cmap='viridis')
+plt.title('Contour Plot')
+plt.colorbar()
+plt.show()
+
+
+
+# =====================================================================
+# 4. DATA PREPROCESSING
+# =====================================================================
+
+# ---- Feature Scaling: Standardization ----
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)   # X is your feature matrix
+
+# To transform a single column
+df['Salary_scaled'] = scaler.fit_transform(df[['Salary']])
+
+
+# ---- Encoding Categorical Data ----
+
+# One-Hot Encoding using get_dummies
+df_encoded = pd.get_dummies(df, columns=['Gender', 'City'])
+
+# One-Hot Encoding with drop_first to avoid dummy variable trap
+df_encoded = pd.get_dummies(df, columns=['Gender'], drop_first=True)
+
+
+# Dictionary Mapping (manual encoding)
+gender_map = {'Male': 0, 'Female': 1}
+df['Gender'] = df['Gender'].map(gender_map)
+
+# Another example
+size_map = {'Small': 1, 'Medium': 2, 'Large': 3}
+df['Size'] = df['Size'].map(size_map)
+
+
+
+# =====================================================================
+# 5. DATA SPLITTING
+# =====================================================================
+
+from sklearn.model_selection import train_test_split
+
+# Splitting Features (X) and Labels (y)
+X = df.drop('Target', axis=1)   # Features
+y = df['Target']                # Label/Target
+
+# Train-Test Split (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
+print("y_train shape:", y_train.shape)
+print("y_test shape:", y_test.shape)
+
+
+
+# =====================================================================
+# 6. MODEL TRAINING BASICS
+# =====================================================================
+
+# General workflow:
+# 1. Initialize the model
+# model = ModelClass()
+
+# 2. Fit (train) the model
+# model.fit(X_train, y_train)
+
+# 3. Predict on new data
+# y_pred = model.predict(X_test)
+
+
+
+# =====================================================================
+# 7. LINEAR REGRESSION
+# =====================================================================
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import numpy as np
+
+# Model Creation
+lr_model = LinearRegression()
+
+# Model Training
+lr_model.fit(X_train, y_train)
+
+# Predictions
+y_pred = lr_model.predict(X_test)
+
+# Coefficients and Intercept
+print("Coefficients:", lr_model.coef_)
+print("Intercept:", lr_model.intercept_)
+
+
+# ---- Evaluation Metrics ----
+
+# Mean Squared Error (MSE)
+mse = mean_squared_error(y_test, y_pred)
+print("MSE:", mse)
+
+# Root Mean Squared Error (RMSE)
+rmse = np.sqrt(mse)
+print("RMSE:", rmse)
+
+# Mean Absolute Error (MAE)
+mae = mean_absolute_error(y_test, y_pred)
+print("MAE:", mae)
+
+# R² Score
+r2 = r2_score(y_test, y_pred)
+print("R² Score:", r2)
+
+
+
+# =====================================================================
+# 8. LOGISTIC REGRESSION
+# =====================================================================
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (confusion_matrix, accuracy_score,
+                             precision_score, recall_score, f1_score,
+                             classification_report)
+
+# Model Creation
+log_model = LogisticRegression(max_iter=1000)
+
+# Model Training
+log_model.fit(X_train, y_train)
+
+# Predictions
+y_pred = log_model.predict(X_test)
+
+
+# ---- Evaluation Metrics ----
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:\n", cm)
+
+# Visualize Confusion Matrix
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Accuracy
+acc = accuracy_score(y_test, y_pred)
+print("Accuracy:", acc)
+
+# Precision
+prec = precision_score(y_test, y_pred, average='binary')   # use average='macro' for multi-class
+print("Precision:", prec)
+
+# Recall
+rec = recall_score(y_test, y_pred, average='binary')
+print("Recall:", rec)
+
+# F1 Score
+f1 = f1_score(y_test, y_pred, average='binary')
+print("F1 Score:", f1)
+
+# Full Classification Report
+print(classification_report(y_test, y_pred))
+
+
+
+# =====================================================================
+# 9. K-NEAREST NEIGHBORS (KNN)
+# =====================================================================
+
+from sklearn.neighbors import KNeighborsClassifier
+
+# Model Creation (default k=5)
+knn_model = KNeighborsClassifier(n_neighbors=5)
+
+# With a different distance metric:
+# - 'euclidean'  (default for p=2)
+# - 'manhattan'  (p=1)
+# - 'minkowski'
+knn_model = KNeighborsClassifier(n_neighbors=5, metric='euclidean')
+
+# Model Training
+knn_model.fit(X_train, y_train)
+
+# Predictions
+y_pred = knn_model.predict(X_test)
+
+# Accuracy
+print("KNN Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# ---- Choosing the Best Value of K ----
+error_rates = []
+for k in range(1, 21):
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    pred_k = knn.predict(X_test)
+    error_rates.append(np.mean(pred_k != y_test))
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 21), error_rates, marker='o', linestyle='--', color='blue')
+plt.title('Error Rate vs K Value')
+plt.xlabel('K')
+plt.ylabel('Error Rate')
+plt.show()
+
+
+
+# =====================================================================
+# 10. DECISION TREE
+# =====================================================================
+
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+# Model Creation
+# Splitting criterion: 'gini' (default) or 'entropy'
+dt_model = DecisionTreeClassifier(criterion='gini', max_depth=5, random_state=42)
+
+# Using Entropy
+dt_model_entropy = DecisionTreeClassifier(criterion='entropy', max_depth=5, random_state=42)
+
+# Model Training
+dt_model.fit(X_train, y_train)
+
+# Predictions
+y_pred = dt_model.predict(X_test)
+
+# Accuracy
+print("Decision Tree Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# ---- Visualizing the Tree ----
+plt.figure(figsize=(15, 8))
+plot_tree(dt_model, filled=True, feature_names=X.columns, class_names=True)
+plt.show()
+
+
+# Feature Importance
+print("Feature Importances:", dt_model.feature_importances_)
+
+
+
+# =====================================================================
+# 11. K-MEANS CLUSTERING
+# =====================================================================
+
+from sklearn.cluster import KMeans
+
+# Model Creation
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+
+# Model Training (no y because it's unsupervised)
+kmeans.fit(X)
+
+# Cluster labels
+labels = kmeans.labels_
+
+# Cluster centers
+centers = kmeans.cluster_centers_
+
+# Predicting clusters for new data
+new_labels = kmeans.predict(X_new)
+
+
+# ---- Choosing Number of Clusters: Elbow Method ----
+wcss = []   # Within-Cluster Sum of Squares
+for k in range(1, 11):
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    km.fit(X)
+    wcss.append(km.inertia_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('WCSS')
+plt.show()
+
+
+# ---- Cluster Visualization (for 2D data) ----
+plt.figure(figsize=(8, 6))
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis', s=50)
+plt.scatter(centers[:, 0], centers[:, 1], c='red', s=200, marker='X', label='Centroids')
+plt.title('K-Means Clustering')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.legend()
+plt.show()
+
+
+
+# =====================================================================
+# 12. MODEL SAVING AND LOADING
+# =====================================================================
+
+# ---- Using pickle ----
+import pickle
+
+# Save the model
+with open('model_pickle.pkl', 'wb') as file:
+    pickle.dump(model, file)
+
+# Load the model
+with open('model_pickle.pkl', 'rb') as file:
+    loaded_model = pickle.load(file)
+
+# Use the loaded model
+predictions = loaded_model.predict(X_test)
+
+
+# ---- Using joblib (often faster for large numpy arrays / sklearn models) ----
+import joblib
+
+# Save the model
+joblib.dump(model, 'model_joblib.pkl')
+
+# Load the model
+loaded_model = joblib.load('model_joblib.pkl')
+
+# Use the loaded model
+predictions = loaded_model.predict(X_test)
+
+
+# ---- Saving a DataFrame to CSV (for reference) ----
+df.to_csv('output.csv', index=False)
+
+
+# =====================================================================
+# END OF FILE
+# =====================================================================
+
+
+
+
+
+
+
+
+
+
+"""
+================================================================================
+MACHINE LEARNING TASKS - COMPLETE CODE
+================================================================================
+Question 1: Regression  - California Housing Dataset
+Question 2: Classification - Titanic Dataset
+Question 3: Clustering    - Iris Dataset (K-Means)
+
+How to run:
+    pip install pandas numpy matplotlib seaborn scikit-learn
+    python All_ML_Tasks.py
+================================================================================
+"""
+
+
+# ##############################################################################
+# QUESTION 1: REGRESSION TASK - CALIFORNIA HOUSING DATASET
+# ##############################################################################
+
+# ----------------- Part 1: Data Preprocessing & EDA --------------------------
+
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+sns.set_style('whitegrid')
+
+# Load the California Housing dataset
+housing = fetch_california_housing()
+df = pd.DataFrame(housing.data, columns=housing.feature_names)
+df['MedHouseVal'] = housing.target  # target column
+
+print('Shape of dataset:', df.shape)
+print(df.head())
+
+# Dataset structure
+df.info()
+
+# Summary statistics
+print(df.describe())
+
+# Check for missing values
+print('Missing values per column:')
+print(df.isnull().sum())
+
+# Scatter plot: Median Income vs House Value
+plt.figure(figsize=(8, 5))
+plt.scatter(df['MedInc'], df['MedHouseVal'], alpha=0.3, color='teal')
+plt.xlabel('Median Income (MedInc)')
+plt.ylabel('Median House Value')
+plt.title('Median Income vs Median House Value')
+plt.show()
+
+# Correlation heatmap
+plt.figure(figsize=(10, 7))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Correlation Heatmap - California Housing')
+plt.show()
+
+# Distribution of target variable
+plt.figure(figsize=(8, 4))
+sns.histplot(df['MedHouseVal'], bins=40, kde=True, color='purple')
+plt.title('Distribution of Median House Value')
+plt.xlabel('MedHouseVal')
+plt.show()
+
+# EDA Insights:
+# - Dataset has 20,640 rows and 9 columns; no missing values.
+# - MedInc has the strongest positive correlation with house value.
+# - Target variable is right-skewed and capped at 5.0.
+
+# Separate features (X) and target (y)
+X = df.drop('MedHouseVal', axis=1)
+y = df['MedHouseVal']
+
+# Standardize numerical features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+
+
+# ----------------- Part 2: Model Training ------------------------------------
+
+# Split into training and testing sets (80/20)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
+# Model 1: Linear Regression
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+y_pred_lr = lr_model.predict(X_test)
+
+# Model 2: Decision Tree Regressor
+dt_model = DecisionTreeRegressor(random_state=42, max_depth=10)
+dt_model.fit(X_train, y_train)
+y_pred_dt = dt_model.predict(X_test)
+
+
+# ----------------- Part 3: Model Evaluation & Visualization ------------------
+
+mse_lr = mean_squared_error(y_test, y_pred_lr)
+r2_lr  = r2_score(y_test, y_pred_lr)
+mse_dt = mean_squared_error(y_test, y_pred_dt)
+r2_dt  = r2_score(y_test, y_pred_dt)
+
+results = pd.DataFrame({
+    'Model': ['Linear Regression', 'Decision Tree'],
+    'MSE'  : [mse_lr, mse_dt],
+    'R2'   : [r2_lr, r2_dt]
+})
+print(results)
+
+# Actual vs Predicted plots
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+axes[0].scatter(y_test, y_pred_lr, alpha=0.3, color='steelblue')
+axes[0].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
+axes[0].set_xlabel('Actual')
+axes[0].set_ylabel('Predicted')
+axes[0].set_title('Linear Regression: Actual vs Predicted')
+
+axes[1].scatter(y_test, y_pred_dt, alpha=0.3, color='darkorange')
+axes[1].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
+axes[1].set_xlabel('Actual')
+axes[1].set_ylabel('Predicted')
+axes[1].set_title('Decision Tree: Actual vs Predicted')
+
+plt.tight_layout()
+plt.show()
+
+# Bar chart comparison of R^2 scores
+plt.figure(figsize=(7, 4))
+sns.barplot(x='Model', y='R2', data=results, palette=['steelblue', 'darkorange'])
+plt.title('Model R2 Score Comparison')
+plt.ylim(0, 1)
+for i, v in enumerate(results['R2']):
+    plt.text(i, v + 0.01, f'{v:.3f}', ha='center', fontweight='bold')
+plt.show()
+
+# Conclusion:
+# Decision Tree Regressor (R2 ~ 0.70) outperforms Linear Regression (R2 ~ 0.58)
+# because house prices have non-linear relationships with the features.
+
+
+
+# ##############################################################################
+# QUESTION 2: CLASSIFICATION TASK - TITANIC DATASET
+# ##############################################################################
+
+# ----------------- Part 1: Data Preprocessing & EDA --------------------------
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Load Titanic dataset from seaborn
+df = sns.load_dataset('titanic')
+print('Shape:', df.shape)
+print(df.head())
+
+# Dataset structure
+df.info()
+
+# Summary statistics
+print(df.describe(include='all'))
+
+# Check for missing values
+print('Missing values per column:')
+print(df.isnull().sum())
+
+# Survival count plot
+plt.figure(figsize=(6, 4))
+sns.countplot(x='survived', data=df, palette=['salmon', 'seagreen'])
+plt.title('Survival Count (0 = Died, 1 = Survived)')
+plt.xlabel('Survived')
+plt.ylabel('Number of Passengers')
+plt.show()
+
+# Survival by gender
+plt.figure(figsize=(6, 4))
+sns.countplot(x='sex', hue='survived', data=df, palette=['salmon', 'seagreen'])
+plt.title('Survival by Gender')
+plt.show()
+
+# Drop columns that are duplicates or not useful for modelling
+# 'deck' has too many missing values; 'alive' duplicates the target;
+# 'who', 'adult_male', 'class', 'embark_town', 'alone' are derived from others
+df = df.drop(columns=['deck', 'alive', 'who', 'adult_male',
+                      'class', 'embark_town', 'alone'])
+
+# Handle missing values
+df['age'] = df['age'].fillna(df['age'].median())
+df['embarked'] = df['embarked'].fillna(df['embarked'].mode()[0])
+
+print('Missing values after handling:')
+print(df.isnull().sum())
+
+# Encode categorical variables
+df['sex'] = df['sex'].map({'male': 0, 'female': 1})
+df = pd.get_dummies(df, columns=['embarked'], drop_first=True)
+df = df.astype({col: 'int' for col in df.select_dtypes('bool').columns})
+
+# Correlation heatmap
+plt.figure(figsize=(10, 7))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Correlation Heatmap - Titanic')
+plt.show()
+
+# EDA Insights:
+# - About 38% of passengers survived.
+# - Females survived at much higher rates than males.
+# - Higher class passengers (pclass=1) had better chances of survival.
+# - Filled missing 'age' with median and 'embarked' with mode.
+
+# Separate features (X) and target (y)
+X = df.drop('survived', axis=1)
+y = df['survived']
+
+# Standardize numerical features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+
+
+# ----------------- Part 2: Model Training ------------------------------------
+
+# Split (stratified to keep class balance)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Model 1: Logistic Regression
+log_model = LogisticRegression(max_iter=1000, random_state=42)
+log_model.fit(X_train, y_train)
+y_pred_log = log_model.predict(X_test)
+
+# Model 2: Decision Tree Classifier
+dt_model = DecisionTreeClassifier(random_state=42, max_depth=5)
+dt_model.fit(X_train, y_train)
+y_pred_dt = dt_model.predict(X_test)
+
+
+# ----------------- Part 3: Model Evaluation & Visualization ------------------
+
+acc_log = accuracy_score(y_test, y_pred_log)
+acc_dt  = accuracy_score(y_test, y_pred_dt)
+
+print(f'Logistic Regression Accuracy : {acc_log:.4f}')
+print(f'Decision Tree Accuracy       : {acc_dt:.4f}')
+
+# Detailed classification reports
+print('--- Logistic Regression ---')
+print(classification_report(y_test, y_pred_log))
+print('--- Decision Tree ---')
+print(classification_report(y_test, y_pred_dt))
+
+# Confusion matrices
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+cm_log = confusion_matrix(y_test, y_pred_log)
+sns.heatmap(cm_log, annot=True, fmt='d', cmap='Blues', ax=axes[0],
+            xticklabels=['Died', 'Survived'], yticklabels=['Died', 'Survived'])
+axes[0].set_title('Logistic Regression - Confusion Matrix')
+axes[0].set_xlabel('Predicted')
+axes[0].set_ylabel('Actual')
+
+cm_dt = confusion_matrix(y_test, y_pred_dt)
+sns.heatmap(cm_dt, annot=True, fmt='d', cmap='Oranges', ax=axes[1],
+            xticklabels=['Died', 'Survived'], yticklabels=['Died', 'Survived'])
+axes[1].set_title('Decision Tree - Confusion Matrix')
+axes[1].set_xlabel('Predicted')
+axes[1].set_ylabel('Actual')
+
+plt.tight_layout()
+plt.show()
+
+# Accuracy comparison bar chart
+plt.figure(figsize=(7, 4))
+models = ['Logistic Regression', 'Decision Tree']
+accs   = [acc_log, acc_dt]
+bars = plt.bar(models, accs, color=['steelblue', 'darkorange'])
+plt.ylabel('Accuracy')
+plt.title('Model Accuracy Comparison')
+plt.ylim(0, 1)
+for bar, acc in zip(bars, accs):
+    plt.text(bar.get_x() + bar.get_width()/2, acc + 0.01,
+             f'{acc:.3f}', ha='center', fontweight='bold')
+plt.show()
+
+# Conclusion:
+# Both models achieve ~0.78-0.82 accuracy. Logistic Regression is generally
+# slightly more stable; Decision Tree's max_depth=5 prevents overfitting.
+# Most important features: sex, pclass, fare.
+
+
+
+# ##############################################################################
+# QUESTION 3: CLUSTERING TASK - IRIS DATASET (K-MEANS)
+# ##############################################################################
+
+# ----------------- Part 1: Data Preprocessing & EDA --------------------------
+
+from sklearn.datasets import load_iris
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Load Iris dataset
+iris = load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df['species'] = [iris.target_names[i] for i in iris.target]  # kept only for later comparison
+
+print('Shape:', df.shape)
+print(df.head())
+
+# Dataset structure
+df.info()
+
+# Summary statistics
+print(df.describe())
+
+# Check for missing values
+print('Missing values per column:')
+print(df.isnull().sum())
+
+# Scatter plot: Sepal Length vs Petal Length
+plt.figure(figsize=(8, 5))
+sns.scatterplot(x='sepal length (cm)', y='petal length (cm)',
+                hue='species', data=df, palette='Set1', s=70)
+plt.title('Sepal Length vs Petal Length (by species)')
+plt.show()
+
+# Correlation heatmap (numeric columns only)
+plt.figure(figsize=(7, 5))
+sns.heatmap(df.drop('species', axis=1).corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Correlation Heatmap - Iris')
+plt.show()
+
+# Pairplot
+sns.pairplot(df, hue='species', palette='Set1')
+plt.show()
+
+# EDA Insights:
+# - 150 rows, 4 numerical features, no missing values.
+# - Petal length and petal width strongly correlated (r ~ 0.96).
+# - Setosa is linearly separable; Versicolor and Virginica overlap slightly.
+
+# Define feature set X (drop the species label - this is unsupervised learning)
+X = df.drop('species', axis=1)
+
+# Standardize features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+
+
+# ----------------- Part 2: Model Training ------------------------------------
+
+# Compute silhouette scores for k = 2 to 10
+silhouette_scores = []
+k_values = range(2, 11)
+
+for k in k_values:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(X_scaled)
+    score = silhouette_score(X_scaled, labels)
+    silhouette_scores.append(score)
+    print(f'k = {k}  ->  silhouette score = {score:.4f}')
+
+# Plot silhouette scores
+plt.figure(figsize=(8, 4))
+plt.plot(list(k_values), silhouette_scores, marker='o', color='teal')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Silhouette Score')
+plt.title('Silhouette Method for Optimal k')
+plt.xticks(list(k_values))
+plt.grid(True)
+plt.show()
+
+# Pick k with highest silhouette score
+optimal_k = list(k_values)[int(np.argmax(silhouette_scores))]
+print(f'Optimal number of clusters: k = {optimal_k}')
+
+# Train final K-Means with optimal k
+kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)
+cluster_labels = kmeans.fit_predict(X_scaled)
+df['cluster'] = cluster_labels
+
+
+# ----------------- Part 3: Model Evaluation & Visualization ------------------
+
+final_score = silhouette_score(X_scaled, cluster_labels)
+print(f'Final Silhouette Score (k={optimal_k}): {final_score:.4f}')
+
+# Scatter plot of clusters with centroids (Petal Length vs Petal Width)
+plt.figure(figsize=(9, 6))
+sns.scatterplot(x=df['petal length (cm)'], y=df['petal width (cm)'],
+                hue=df['cluster'], palette='Set2', s=80, edgecolor='black')
+
+# Convert centroids back to original scale for plotting
+centroids_scaled = kmeans.cluster_centers_
+centroids_original = scaler.inverse_transform(centroids_scaled)
+centroids_df = pd.DataFrame(centroids_original, columns=X.columns)
+
+plt.scatter(centroids_df['petal length (cm)'], centroids_df['petal width (cm)'],
+            marker='X', s=300, c='red', edgecolor='black',
+            label='Centroids', linewidth=2)
+
+plt.xlabel('Petal Length (cm)')
+plt.ylabel('Petal Width (cm)')
+plt.title(f'K-Means Clusters (k={optimal_k}) with Centroids')
+plt.legend()
+plt.show()
+
+# Optional: compare clusters with actual species
+comparison = pd.crosstab(df['species'], df['cluster'],
+                          rownames=['Actual Species'], colnames=['Cluster'])
+print('Cluster vs Actual Species:')
+print(comparison)
+
+plt.figure(figsize=(7, 4))
+sns.heatmap(comparison, annot=True, fmt='d', cmap='YlGnBu')
+plt.title('Cluster Assignments vs Actual Species')
+plt.show()
+
+# Conclusion:
+# Silhouette suggests k=2 (~0.58) but k=3 (~0.46) matches the 3 actual species.
+# Setosa is perfectly separated; Versicolor and Virginica overlap slightly.
